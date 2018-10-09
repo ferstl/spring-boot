@@ -5,8 +5,13 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
 import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
@@ -14,24 +19,26 @@ import org.springframework.boot.actuate.trace.http.HttpTrace.Principal;
 import org.springframework.boot.actuate.trace.http.HttpTrace.Request;
 import org.springframework.boot.actuate.trace.http.HttpTrace.Response;
 import org.springframework.core.io.ClassPathResource;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import static java.util.Collections.singletonList;
-import static java.util.Collections.singletonMap;
+
 import static org.junit.Assert.assertEquals;
 
-public class HttpTraceTest {
+/**
+ * Tests for {@link HttpTrace}
+ *
+ * @author Stefan Ferstl
+ */
+public class HttpTraceTests {
 
 	private final ObjectMapper objectMapper;
 	private final String exampleJson;
 
-	public HttpTraceTest() throws IOException {
-		objectMapper = new ObjectMapper();
-		objectMapper.registerModule(new JavaTimeModule());
+	public HttpTraceTests() throws IOException {
+		this.objectMapper = new ObjectMapper();
+		this.objectMapper.registerModule(new JavaTimeModule());
 
 		ClassPathResource exampleJsonResource = new ClassPathResource("trace/http/example-trace.json");
 		try(InputStream is = exampleJsonResource.getInputStream()) {
-			exampleJson = IOUtils.toString(is).trim();
+			this.exampleJson = IOUtils.toString(is).trim();
 		}
 	}
 
@@ -39,14 +46,14 @@ public class HttpTraceTest {
 	public void jsonSerialization() throws IOException, URISyntaxException {
 		HttpTrace trace = createHttpTrace();
 
-		String jsonValue = objectMapper.writeValueAsString(trace);
+		String jsonValue = this.objectMapper.writeValueAsString(trace);
 
-		assertEquals(exampleJson, jsonValue);
+		assertEquals(this.exampleJson, jsonValue);
 	}
 
 	@Test
 	public void jsonDeserialization() throws IOException, URISyntaxException {
-		HttpTrace deserializedTrace = objectMapper.readValue(exampleJson, HttpTrace.class);
+		HttpTrace deserializedTrace = this.objectMapper.readValue(this.exampleJson, HttpTrace.class);
 		HttpTrace originalTrace = createHttpTrace();
 
 		assertEquals(originalTrace.getTimestamp(), deserializedTrace.getTimestamp());
@@ -68,8 +75,8 @@ public class HttpTraceTest {
 	@NotNull
 	private static HttpTrace createHttpTrace() throws URISyntaxException {
 		HttpTrace trace = new HttpTrace();
-		Map<String, List<String>> requestHeader = singletonMap("X-Req-Header", singletonList("reqHeaderValue"));
-		Map<String, List<String>> responseHeader = singletonMap("X-Resp-Header", singletonList("respHeaderValue"));
+		Map<String, List<String>> requestHeader = Collections.singletonMap("X-Req-Header", Collections.singletonList("reqHeaderValue"));
+		Map<String, List<String>> responseHeader = Collections.singletonMap("X-Resp-Header", Collections.singletonList("respHeaderValue"));
 		Instant timestamp = Instant.parse("2018-10-09T04:16:26.979Z");
 
 		trace.setTimestamp(timestamp);

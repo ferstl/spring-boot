@@ -32,6 +32,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
  *
  * @author Dave Syer
  * @author Andy Wilkinson
+ * @author Stefan Ferstl
  * @since 2.0.0
  */
 public final class HttpTrace {
@@ -52,7 +53,8 @@ public final class HttpTrace {
 		this.request = new Request(request);
 	}
 
-	public HttpTrace() {}
+	public HttpTrace() {
+	}
 
 	public void setTimestamp(Instant timestamp) {
 		this.timestamp = timestamp;
